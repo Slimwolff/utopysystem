@@ -2,75 +2,109 @@ let canvas = document.getElementById("canvas")
 let ctx = canvas.getContext('2d');
 let p = document.getElementById("test")
 
-let euler = 2.71828182845904523536;
-let accel = .9997531;
-let aten = 0.12;
+let cursor = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+}
 
-let ball = {
-    x: 230,
-    y: 120,
-    mx: 1.5,
-    my: 1.5,
-    r: 15,
-    speed: 0.11,
-    color: "#012afa",
-    draw() {
+canvas.addEventListener('mousemove', (e) => {
+    cursor.x = e.clientX
+    cursor.y = e.clientY
+})
+
+function ball(x, y, centerX, centerY, radiusCircle, radiusRotation, speed, color) {
+    this.x = x;
+    this.y = y;
+    this.cx = centerX;
+    this.cy = centerY;
+    this.r = radiusCircle;
+    this.speed = speed;
+    this.color = color;
+    this.circunference = 2 * Math.PI * radiusRotation;
+    this.radiusCircun = radiusRotation * Math.PI;
+
+    this.draw = function() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.fillStyle = this.color;
         ctx.fill();
-    },
-    move(w, h) {
-        this.x += this.mx;
-        this.y += this.my;
+    };
+
+    this.move = function() {
+        this.x = this.cx + Math.cos(this.circunference) * this.radiusCircun;
+        this.y = this.cy + Math.sin(this.circunference) * this.radiusCircun;
+        this.circunference += this.speed
+    };
+
+    this.moveAround = function(e) {
+        this.x = e.x + Math.cos(this.circunference) * this.radiusCircun;
+        this.y = e.y + Math.sin(this.circunference) * this.radiusCircun;
+        this.circunference += this.speed;
     }
 }
-ball.draw()
+    
 
-let theta = 10 * Math.PI * 2
-let angle = 1
-let t = 3.5 * Math.PI 
+
+let green = new ball(
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.width / 2,
+    canvas.height / 2,
+    10,
+    15,
+    0.02,
+    "#12fa09"
+)
+
+let blue = new ball(
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.width / 2,
+    canvas.height / 2,
+    10,
+    30,
+    0.09,
+    "#099afa"
+)
+
+
+function hexagon(x, y, size, hexSize) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.hexSize = hexSize;
+
+    this.draw = function() {
+        ctx.beginPath()
+        ctx.moveTo(this.x,this.y)
+        ctx.lineTo(this.x+this.hexSize,this.y+this.size)
+        ctx.lineTo(this.x+this.hexSize,this.y+this.size+this.size)
+        ctx.stroke()
+        ctx.closePath();
+        
+    }
+}
+
+let hex = new hexagon(100,100, 50, 75);
 
 function init() {
-    ctx.fillStyle = "rgb( 255 255 255 / 15%)"
+    ctx.fillStyle = "rgb( 255 255 255 / 10%)"
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-
-    let x = ball.x
-    let y = ball.y
-    let r = 7
-    let a = 100;
-    let b = a;
-
-    // if (ball.x + ball.r >= canvas.width || ball.x - ball.r <= 0) {
-    //     ball.mx = -ball.mx
-    // }
-
-    // if (ball.y + ball.r >= canvas.height || ball.y - ball.r <= 0) {
-    //     ball.my = -ball.my
-    // }
-
-    if(angle > 360) {
-        angle = 1
-    }
-
-
-    angle += ball.speed
     
-    ball.mx = Math.cos(angle) * (2 * Math.PI * 1.5)
-    ball.my = Math.sin(angle) * (2 * Math.PI * 1.5)
+   
+    green.draw();
+    green.move();
 
-    ball.move()
-    ball.draw();
+    blue.draw()
+    blue.moveAround(green)
 
-    p.innerHTML = `X: ${ball.x} | Y: ${ball.y}` + '<br>' + 
-    `theta: ${theta} | cos: ${Math.cos(theta)} | sin: ${Math.sin(theta)}` + '<br>' +
-    `b.mx: ${ball.mx} | b.my: ${ball.my}`
+
+    hex.draw()
 
     setTimeout(() => {
         window.requestAnimationFrame(init)
-    }, 1000 / 60)
+    }, 1000 / 240)
     
 }
 
